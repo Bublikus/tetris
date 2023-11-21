@@ -72,7 +72,7 @@ header h3 {
 html,
 body {
   overflow: hidden;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
 }
 
 .bg {
@@ -189,7 +189,7 @@ footer {
   font-size: 18px;
   font-weight: 700;
   color: white;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: "Courier New", Courier, monospace;
   box-shadow: inset -4px -4px rgba(0, 0, 0, 0.25);
   cursor: pointer;
 }
@@ -212,9 +212,51 @@ footer {
   gap: 8px;
   font-size: 18px;
   line-height: 1;
-  font-family: 'Times New Roman', Times, serif;
+  font-family: "Times New Roman", Times, serif;
 }
 
 .help div {
   white-space: pre-wrap;
+}
+
+.leaderboard {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 9;
+  color: white;
+}
+
+.leaderboard-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  border: 6px solid #333333;
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.5);
+  box-shadow: inset -4px -4px rgba(0, 0, 0, 0.25);
+}
+
+.leaderboard h3 {
+  padding-bottom: 20px;
+}
+
+.leaderboard ol {
+  list-style: none;
+}
+
+.leaderboard ol li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: space-evenly;
+  width: 100%;
+  padding: 8px 0;
 }

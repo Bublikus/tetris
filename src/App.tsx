@@ -1,6 +1,6 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { Tetris } from "./Tetris";
-import { getLeaderboard } from "./firebase";
+import { getLeaderboard, Leader } from "./firebase";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;
@@ -12,6 +12,8 @@ export const App: FC = () => {
 
   const [loading, setLoading] = useState(true);
   const [gameArea, setGameArea] = useState<string[][]>([]);
+  const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
 
   const restart = () => {
     if (!isInstance) {
@@ -26,6 +28,7 @@ export const App: FC = () => {
       isInstance = false;
       tetrisRef.current?.destroy();
       tetrisRef.current = undefined;
+      setIsShownLeaderboard(true);
     }
   }, [tetrisRef.current?.isEndGame]);
 
@@ -78,7 +81,7 @@ export const App: FC = () => {
   ].find(Boolean);
 
   useEffect(() => {
-    getLeaderboard().then(console.info);
+    getLeaderboard().then(setLeaders);
   }, []);
 
   return (
@@ -112,6 +115,23 @@ export const App: FC = () => {
               </div>
             ))}
           </section>
+        )}
+
+        {isShownLeaderboard && (
+          <div className="leaderboard">
+            <div className="leaderboard-box">
+              <h3>Leaderboard</h3>
+              <ol>
+                {leaders.map((leader, i) => (
+                  <li key={i}>
+                    <span>{i + 1}</span>
+                    <span>{leader.player}</span>
+                    <span>{leader.lines}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </div>
         )}
 
         <footer>

@@ -19,11 +19,17 @@ export const analytics = getAnalytics(app);
 
 // Requests
 
-export async function getLeaderboard() {
+export type Leader = {
+  player: string;
+  lines: number;
+  date: string;
+};
+
+export async function getLeaderboard(): Promise<Leader[]> {
   try {
     const citiesCol = collection(db, "leaderboard");
     const citySnapshot = await getDocs(citiesCol);
-    const cityList = citySnapshot.docs.map((doc) => doc.data());
+    const cityList = citySnapshot.docs.map((doc) => doc.data() as Leader);
     return cityList || [];
   } catch (error) {
     console.log(error);

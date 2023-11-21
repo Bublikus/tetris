@@ -10,6 +10,8 @@ let isInstance = false;
 export const App: FC = () => {
   const tetrisRef = useRef<Tetris>();
 
+  const defaultName = useRef(localStorage.getItem("playerName"));
+
   const [loading, setLoading] = useState(true);
   const [gameArea, setGameArea] = useState<string[][]>([]);
   const [leaders, setLeaders] = useState<Leader[]>([]);
@@ -32,20 +34,37 @@ export const App: FC = () => {
       setIsShownLeaderboard(true);
 
       if (tetrisRef.current?.erasedLines) {
-        const DEFAULT_NAME = "Player";
+        const promptPlayer = () => {
+          let playerName;
 
-        const player = prompt(
-          `Lines: ${tetrisRef.current?.erasedLines}\n\nEnter your name: `,
-          DEFAULT_NAME
-        );
+          while (true) {
+            const player = prompt(
+              `Lines: ${tetrisRef.current?.erasedLines}\n\nEnter your name: `,
+              defaultName.current ?? undefined
+            );
 
-        const playerName = player?.trim().slice(0, 50) || DEFAULT_NAME;
-        const playerId = await addPayerToLeaderboard(
-          playerName,
-          tetrisRef.current?.erasedLines || 0
-        );
-        if (playerId) setOwnId(playerId);
-        await getLeaderboard().then(setLeaders);
+            playerName = player?.trim().slice(0, 50);
+
+            if (playerName !== null && playerName !== "") break;
+          }
+
+          return playerName;
+        };
+
+        const playerName = promptPlayer();
+
+        if (playerName) {
+          const playerId = await addPayerToLeaderboard(
+            playerName,
+            tetrisRef.current?.erasedLines || 0
+          );
+
+          localStorage.setItem("playerName", playerName);
+          defaultName.current = playerName;
+
+          if (playerId) setOwnId(playerId);
+          await getLeaderboard().then(setLeaders);
+        }
       }
 
       isInstance = false;

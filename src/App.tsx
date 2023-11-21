@@ -18,6 +18,7 @@ export const App: FC = () => {
   const restart = () => {
     if (!isInstance) {
       isInstance = true;
+      tetrisRef.current = undefined;
       tetrisRef.current = new Tetris({ renderer: setGameArea });
       tetrisRef.current.start();
     }
@@ -27,7 +28,6 @@ export const App: FC = () => {
     if (tetrisRef.current?.isEndGame) {
       isInstance = false;
       tetrisRef.current?.destroy();
-      tetrisRef.current = undefined;
       setIsShownLeaderboard(true);
     }
   }, [tetrisRef.current?.isEndGame]);
@@ -118,7 +118,10 @@ export const App: FC = () => {
         )}
 
         {isShownLeaderboard && (
-          <div className="leaderboard">
+          <div
+            className="leaderboard"
+            onClick={() => (setIsShownLeaderboard(false), restart())}
+          >
             <div className="leaderboard-box">
               <h3>Leaderboard</h3>
               <ol>

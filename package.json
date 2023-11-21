@@ -1,6 +1,6 @@
 {
-  "name": "stackblitz-starters-peygsq",
-  "version": "0.0.0",
+  "name": "tetris",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@types/react": "18.2.37",

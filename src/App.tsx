@@ -20,7 +20,6 @@ export const App: FC = () => {
   const defaultName = useRef(localStorage.getItem("playerName"));
 
   const [loading, setLoading] = useState(true);
-  const [gameKey, setGameKey] = useState(Math.random());
   const [gameArea, setGameArea] = useState<string[][]>([]);
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
@@ -40,7 +39,6 @@ export const App: FC = () => {
   const handleRestart = () => {
     setIsShownLeaderboard(false);
     trackTetrisGameRestart();
-    setGameKey(Math.random());
     restart();
   };
 
@@ -152,7 +150,7 @@ export const App: FC = () => {
   return (
     <>
       {loading && <p className="loading">loading...</p>}
-      <main key={gameKey} className={loading ? "loading" : ""}>
+      <main className={loading ? "loading" : ""}>
         <img
           className="bg"
           src="https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVFGQ1E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--4a5575ba353ee148033a35717f39154a2471941f/tetris-bg-5.jpg"

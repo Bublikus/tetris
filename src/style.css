@@ -25,6 +25,7 @@ body {
 #root {
   flex: 1 0 auto;
   min-width: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -102,6 +103,7 @@ header {
 }
 
 main {
+  overflow: hidden;
   transition: 0.5s ease-in-out;
 }
 
@@ -225,6 +227,7 @@ footer {
 
 .leaderboard {
   position: fixed;
+  overflow: hidden;
   inset: 0;
   display: flex;
   flex-direction: column;

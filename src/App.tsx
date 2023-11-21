@@ -13,6 +13,7 @@ export const App: FC = () => {
   const [loading, setLoading] = useState(true);
   const [gameArea, setGameArea] = useState<string[][]>([]);
   const [leaders, setLeaders] = useState<Leader[]>([]);
+  const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
 
   const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
@@ -31,14 +32,19 @@ export const App: FC = () => {
       setIsShownLeaderboard(true);
 
       if (tetrisRef.current?.erasedLines) {
+        const DEFAULT_NAME = "Player";
+
         const player = prompt(
-          `Lines: ${tetrisRef.current?.erasedLines}\n\nEnter your name: `
+          `Lines: ${tetrisRef.current?.erasedLines}\n\nEnter your name: `,
+          DEFAULT_NAME
         );
-        const playerName = player?.trim().slice(0, 50) || "Player";
-        await addPayerToLeaderboard(
+
+        const playerName = player?.trim().slice(0, 50) || DEFAULT_NAME;
+        const playerId = await addPayerToLeaderboard(
           playerName,
           tetrisRef.current?.erasedLines || 0
         );
+        if (playerId) setOwnId(playerId);
         await getLeaderboard().then(setLeaders);
       }
 
@@ -152,8 +158,14 @@ export const App: FC = () => {
                 </thead>
                 <tbody>
                   {sortedLeaders.map((leader, i) => (
-                    <tr key={i}>
-                      <td>{i + 1}</td>
+                    <tr
+                      key={leader.id}
+                      className={leader.id === ownId ? "strong" : ""}
+                    >
+                      <td>
+                        {leader.id === ownId ? "→ " : ""}
+                        {i + 1}
+                      </td>
                       <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
                       <td>{leader.lines}</td>
                     </tr>

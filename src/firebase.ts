@@ -28,6 +28,7 @@ export const analytics = getAnalytics(app);
 // Requests
 
 export type Leader = {
+  id: string;
   player: string;
   lines: number;
   date: string;
@@ -39,7 +40,9 @@ export async function getLeaderboard(): Promise<Leader[]> {
     const q = query(colRef, orderBy("lines", "desc"), limit(10));
     const docsRef = await getDocs(q);
 
-    return docsRef.docs.map((doc) => doc.data() as Leader) || [];
+    return (
+      docsRef.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Leader)) || []
+    );
   } catch (error) {
     console.log(error);
     return [];

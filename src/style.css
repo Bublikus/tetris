@@ -219,6 +219,10 @@ footer {
   white-space: pre-wrap;
 }
 
+.strong {
+  font-weight: bold;
+}
+
 .leaderboard {
   position: fixed;
   inset: 0;

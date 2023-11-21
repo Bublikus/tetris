@@ -1,6 +1,13 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { Tetris } from "./Tetris";
-import { addPayerToLeaderboard, getLeaderboard, Leader } from "./firebase";
+import {
+  addPayerToLeaderboard,
+  getLeaderboard,
+  Leader,
+  trackTetrisGameFinish,
+  trackTetrisGameRestart,
+  trackTetrisSignGameFinish,
+} from "./firebase";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;
@@ -29,11 +36,19 @@ export const App: FC = () => {
     }
   };
 
+  const handleRestart = () => {
+    setIsShownLeaderboard(false);
+    trackTetrisGameRestart();
+    restart();
+  };
+
   useEffect(() => {
     const endGame = async () => {
       setIsShownLeaderboard(true);
 
       if (tetrisRef.current?.erasedLines) {
+        trackTetrisGameFinish(tetrisRef.current?.erasedLines || 0);
+
         const promptPlayer = () => {
           let playerName;
 
@@ -63,6 +78,12 @@ export const App: FC = () => {
           defaultName.current = playerName;
 
           if (playerId) setOwnId(playerId);
+
+          trackTetrisSignGameFinish(
+            tetrisRef.current?.erasedLines || 0,
+            playerName
+          );
+
           await getLeaderboard().then(setLeaders);
         }
       }
@@ -160,11 +181,7 @@ export const App: FC = () => {
         )}
 
         {isShownLeaderboard && (
-          <div
-            role="button"
-            className="leaderboard"
-            onClick={() => (setIsShownLeaderboard(false), restart())}
-          >
+          <div role="button" className="leaderboard" onClick={handleRestart}>
             <div className="leaderboard-box">
               <h3>Leaderboard</h3>
               <table>

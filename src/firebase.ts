@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, logEvent } from "firebase/analytics";
 import {
   getFirestore,
   collection,
@@ -61,4 +61,23 @@ export async function addPayerToLeaderboard(player: string, lines: number) {
   } catch (error) {
     console.log(error);
   }
+}
+
+// Analytics
+
+export function trackTetrisGameFinish(lines: number) {
+  logEvent(analytics, "tetris_game_finish", {
+    lines,
+  });
+}
+
+export function trackTetrisSignGameFinish(lines: number, player: string) {
+  logEvent(analytics, "tetris_sign_game_finish", {
+    lines,
+    player,
+  });
+}
+
+export function trackTetrisGameRestart() {
+  logEvent(analytics, "tetris_game_restart");
 }

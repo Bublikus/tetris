@@ -1,5 +1,6 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { Tetris } from "./Tetris";
+import { getLeaderboard } from "./firebase";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;
@@ -75,6 +76,10 @@ export const App: FC = () => {
     !isFull && tetrisRef.current?.isEndGame && "🫣",
     "🧐",
   ].find(Boolean);
+
+  useEffect(() => {
+    getLeaderboard().then(console.info);
+  }, []);
 
   return (
     <>

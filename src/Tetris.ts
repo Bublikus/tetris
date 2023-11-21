@@ -18,7 +18,7 @@ type GameArea = string[][];
 type Renderer = (area: GameArea) => void;
 
 export class Tetris {
-  config: Config = {
+  config: Required<Config> = {
     renderer: (area: GameArea) => null,
     width: 10,
     height: 20,
@@ -33,19 +33,19 @@ export class Tetris {
   private currentShape: Shape = [];
   private prevOrigin: Origin = [0, 0];
   private origin: Origin = [0, 0];
-  private tickInterval: number;
-  private initialTickMs: number;
+  private tickInterval:  ReturnType<typeof setInterval> | undefined;
+  private initialTickMs: number = 0;
   private startedAt: number = 0;
   private pausedAt: number = 0;
   private pausedTime: number = 0;
-  private renderer: Renderer;
-  private inputHandler: InputHandler;
-  private onceInputHandler: InputHandler;
-  private quickInputHandler: InputHandler;
+  private renderer: Renderer = () => null;
+  private inputHandler: InputHandler | undefined;
+  private onceInputHandler: InputHandler | undefined;
+  private quickInputHandler: InputHandler | undefined;
 
   isPaused: boolean = false;
   isEndGame: boolean = false;
-  erasiedLines: number = 0;
+  erasedLines: number = 0;
 
   constructor(config: Config) {
     this.init(config);
@@ -53,7 +53,7 @@ export class Tetris {
 
   start() {
     this.isEndGame = false;
-    this.erasiedLines = 0;
+    this.erasedLines = 0;
     this.startedAt = Date.now();
     this.bindKeys();
     this.createShape();
@@ -295,20 +295,20 @@ export class Tetris {
   }
 
   private getNormalizedShape(shape: Shape): Shape {
-    const minCoords = shape.reduce(
+    const minCoords = shape.reduce<[number, number]>(
       (acc, cell) => [
-        cell[0] < acc[0] || acc[0] === null ? cell[0] : acc[0],
-        cell[1] < acc[1] || acc[1] === null ? cell[1] : acc[1],
+        acc[0] === null || cell[0] < acc[0]  ? cell[0] : acc[0],
+        acc[1] === null || cell[1] < acc[1] ? cell[1] : acc[1],
       ],
-      [null, null]
+      [null, null] as unknown as [number, number]
     );
 
-    const maxCoords = shape.reduce(
+    const maxCoords = shape.reduce<[number, number]>(
       (acc, cell) => [
-        cell[0] > acc[0] || acc[0] === null ? cell[0] : acc[0],
-        cell[1] > acc[1] || acc[1] === null ? cell[1] : acc[1],
+        acc[0] === null || cell[0] > acc[0] ? cell[0] : acc[0],
+        acc[1] === null || cell[1] > acc[1] ? cell[1] : acc[1],
       ],
-      [null, null]
+      [null, null] as unknown as [number, number]
     );
 
     const shiftX = Math.round((maxCoords[0] + minCoords[0]) / 2);
@@ -354,10 +354,11 @@ export class Tetris {
       return isFull ? acc.concat(i) : acc;
     }, []);
 
-    this.erasiedLines += fullRowIndexes.length;
+    this.erasedLines += fullRowIndexes.length;
 
     this.cellsHistory = Object.values(this.cellsHistory).reduce((acc, cell) => {
       if (!fullRowIndexes.includes(cell[1])) {
+        // @ts-ignore
         acc[this.geCoordKey(cell)] = cell;
       }
       return acc;
@@ -370,6 +371,7 @@ export class Tetris {
         cell[1] + emptyRowsBelow.length,
         cell[2],
       ];
+      // @ts-ignore
       acc[this.geCoordKey(updatedCell)] = updatedCell;
       return acc;
     }, {});

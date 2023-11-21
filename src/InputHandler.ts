@@ -5,12 +5,12 @@ type InputHandlerActions = Partial<
 type InputHandlerConfig = TouchGestureHandlerConfig & DesktopInputHandlerConfig;
 
 export class InputHandler {
-  private actions: InputHandlerActions;
+  private actions: InputHandlerActions = {};
 
-  private isTouch = 'ontouchstart' in window || navigator.maxTouchPoints;
+  private isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints;
 
-  private touchHandler: TouchGestureHandler;
-  private desktopHandler: DesktopInputHandler;
+  private touchHandler: TouchGestureHandler | undefined;
+  private desktopHandler: DesktopInputHandler | undefined;
 
   constructor(config?: InputHandlerConfig) {
     if (this.isTouch) {
@@ -54,16 +54,16 @@ type TouchGestureHandlerConfig = {
 
 export class TouchGestureHandler {
   private element: HTMLElement | Document;
-  private actions: TouchGestureHandlerActions;
+  private actions: TouchGestureHandlerActions = {};
   private longClickDuration: number;
-  private singleClickTimeout?: number;
+  private singleClickTimeout?: ReturnType<typeof setTimeout>;
   private doubleClickDuration: number;
   private touchStartX: number;
   private touchStartY: number;
   private swipeStartX: number;
   private swipeStartY: number;
   private touchStartTime: number;
-  private lastTapTime: number;
+  private lastTapTime: number = 0;
   private isSwiping: boolean;
   private swipeTickThresholdPX: number;
 
@@ -86,8 +86,11 @@ export class TouchGestureHandler {
 
   public handleActions(actions: TouchGestureHandlerActions) {
     this.actions = actions;
+    // @ts-ignore
     this.element.addEventListener('touchstart', this.handleTouchStart, false);
+    // @ts-ignore
     this.element.addEventListener('touchmove', this.handleTouchMove, false);
+    // @ts-ignore
     this.element.addEventListener('touchend', this.handleTouchEnd, false);
   }
 
@@ -184,10 +187,13 @@ export class TouchGestureHandler {
     clearTimeout(this.singleClickTimeout);
     this.element.removeEventListener(
       'touchstart',
+    // @ts-ignore
       this.handleTouchStart,
       false
     );
+    // @ts-ignore
     this.element.removeEventListener('touchmove', this.handleTouchMove, false);
+    // @ts-ignore
     this.element.removeEventListener('touchend', this.handleTouchEnd, false);
   }
 }
@@ -223,7 +229,7 @@ type DesktopInputHandlerConfig = {
 
 export class DesktopInputHandler {
   private element: HTMLElement | Document;
-  private actions: DesktopInputHandlerActions;
+  private actions: DesktopInputHandlerActions = {};
   private longClickDuration: number;
   private doubleClickDuration: number;
   private longClickTimeout?: number;
@@ -241,9 +247,13 @@ export class DesktopInputHandler {
     this.handleMouseEvents = this.handleMouseEvents.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
 
+    // @ts-ignore
     this.element.addEventListener('keydown', this.handleKeyDown);
+    // @ts-ignore
     this.element.addEventListener('mousedown', this.handleMouseEvents);
+    // @ts-ignore
     this.element.addEventListener('mouseup', this.handleMouseEvents);
+    // @ts-ignore
     this.element.addEventListener('scroll', this.handleScroll);
   }
 
@@ -252,7 +262,7 @@ export class DesktopInputHandler {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    this.actions[event.code]?.(event);
+    this.actions[event.code as keyof typeof this.actions]?.(event);
   }
 
   private handleMouseEvents(event: MouseEvent): void {
@@ -338,9 +348,14 @@ export class DesktopInputHandler {
 
   public destroy() {
     clearTimeout(this.longClickTimeout);
+
+    // @ts-ignore
     this.element.removeEventListener('keydown', this.handleKeyDown);
+    // @ts-ignore
     this.element.removeEventListener('mousedown', this.handleMouseEvents);
+    // @ts-ignore
     this.element.removeEventListener('mouseup', this.handleMouseEvents);
+    // @ts-ignore
     this.element.removeEventListener('scroll', this.handleScroll);
   }
 }

@@ -1,8 +1,8 @@
-import { FC, useState, useRef, useEffect, CSSProperties } from 'react';
-import { Tetris } from './Tetris';
-import './style.css';
+import React, { FC, useState, useRef, useEffect } from "react";
+import { Tetris } from "./Tetris";
+import "./style.css";
 
-const isTouch = 'touchstart' in window || navigator.maxTouchPoints;
+const isTouch = "touchstart" in window || navigator.maxTouchPoints;
 
 let isInstance = false;
 
@@ -24,7 +24,7 @@ export const App: FC = () => {
     if (tetrisRef.current?.isEndGame) {
       isInstance = false;
       tetrisRef.current?.destroy();
-      tetrisRef.current = null;
+      tetrisRef.current = undefined;
     }
   }, [tetrisRef.current?.isEndGame]);
 
@@ -38,7 +38,7 @@ export const App: FC = () => {
       20
     );
 
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         tetrisRef.current?.pause();
       } else {
@@ -46,39 +46,40 @@ export const App: FC = () => {
       }
     });
 
-    const blockGestures = (e) => {
+    const blockGestures = (e: Event) => {
       e.preventDefault();
       (document.body.style as any).zoom = 1;
     };
 
-    document.addEventListener('gesturestart', blockGestures);
-    document.addEventListener('gesturechange', blockGestures);
-    document.addEventListener('gestureend', blockGestures);
+    document.addEventListener("gesturestart", blockGestures);
+    document.addEventListener("gesturechange", blockGestures);
+    document.addEventListener("gestureend", blockGestures);
 
     return () => {
-      document.removeEventListener('gesturestart', blockGestures);
-      document.removeEventListener('gesturechange', blockGestures);
-      document.removeEventListener('gestureend', blockGestures);
+      document.removeEventListener("gesturestart", blockGestures);
+      document.removeEventListener("gesturechange", blockGestures);
+      document.removeEventListener("gestureend", blockGestures);
 
       clearInterval(checkSelectionInterval);
     };
   }, []);
 
   const isFull =
-    tetrisRef.current?.erasiedLines >= tetrisRef.current?.config.height;
-  const isFill = (i) =>
-    i + 1 > gameArea.length - tetrisRef.current.erasiedLines;
+    (tetrisRef.current?.erasedLines || 0) >=
+    (tetrisRef.current?.config.height || 0);
+  const isFill = (i: number) =>
+    i + 1 > gameArea.length - (tetrisRef.current?.erasedLines || 0);
 
   const emoji = [
-    isFull && '😎',
-    !isFull && tetrisRef.current?.isEndGame && '🫣',
-    '🧐',
+    isFull && "😎",
+    !isFull && tetrisRef.current?.isEndGame && "🫣",
+    "🧐",
   ].find(Boolean);
 
   return (
     <>
       {loading && <p className="loading">loading...</p>}
-      <main className={loading ? 'loading' : ''}>
+      <main className={loading ? "loading" : ""}>
         <img
           className="bg"
           src="https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVFGQ1E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--4a5575ba353ee148033a35717f39154a2471941f/tetris-bg-5.jpg"
@@ -89,18 +90,18 @@ export const App: FC = () => {
         <header>
           <h1>Tetris Game</h1>
           <h3>
-            Lines: {tetrisRef.current?.erasiedLines} {emoji}
+            Lines: {tetrisRef.current?.erasedLines || 0} {emoji}
           </h3>
         </header>
 
         {tetrisRef.current && (
           <section className="grid">
             {gameArea.map((row, i) => (
-              <div key={i} className={`row ${isFill(i) ? 'fill' : ''}`}>
+              <div key={i} className={`row ${isFill(i) ? "fill" : ""}`}>
                 {row.map((cell, ii) => (
                   <div
                     key={ii}
-                    className={`cell ${cell} ${cell ? 'shape' : ''}`}
+                    className={`cell ${cell} ${cell ? "shape" : ""}`}
                   />
                 ))}
               </div>
@@ -115,7 +116,7 @@ export const App: FC = () => {
             </button>
           ) : (
             <strong className="help">
-              <span>{isTouch ? 'Swipe' : 'Arrows'} &nbsp;</span>
+              <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
               <div>
                 <div>
                   &nbsp;&nbsp;&thinsp;&thinsp;↑ &nbsp;&nbsp;&nbsp;&nbsp; -

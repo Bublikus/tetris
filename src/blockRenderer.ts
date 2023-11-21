@@ -1,8 +1,8 @@
 const SYMBOLS = {
-  empty: '\xA0',
-  full: '█',
-  top: '▀',
-  bottom: '▄',
+  empty: "\xA0",
+  full: "█",
+  top: "▀",
+  bottom: "▄",
 } as const;
 
 export const blockRenderer = <T extends unknown[][]>(matrix: T): string[][] => {
@@ -26,6 +26,7 @@ export const blockRenderer = <T extends unknown[][]>(matrix: T): string[][] => {
       [`01`]: SYMBOLS.bottom,
       [`00`]: SYMBOLS.empty,
     };
+    // @ts-ignore
     return valueToSymbol[`${+!!smblA}${+!!smblB}`] ?? SYMBOLS.empty;
   }
 

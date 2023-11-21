@@ -226,7 +226,7 @@ footer {
 }
 
 .leaderboard {
-  position: fixed;
+  position: absolute;
   overflow: hidden;
   inset: 0;
   display: flex;

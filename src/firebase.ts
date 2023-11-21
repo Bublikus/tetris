@@ -20,8 +20,13 @@ export const analytics = getAnalytics(app);
 // Requests
 
 export async function getLeaderboard() {
-  const citiesCol = collection(db, "leaderboard");
-  const citySnapshot = await getDocs(citiesCol);
-  const cityList = citySnapshot.docs.map((doc) => doc.data());
-  return cityList || [];
+  try {
+    const citiesCol = collection(db, "leaderboard");
+    const citySnapshot = await getDocs(citiesCol);
+    const cityList = citySnapshot.docs.map((doc) => doc.data());
+    return cityList || [];
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 }

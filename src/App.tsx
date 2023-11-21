@@ -119,6 +119,7 @@ export const App: FC = () => {
 
         {isShownLeaderboard && (
           <div
+            role="button"
             className="leaderboard"
             onClick={() => (setIsShownLeaderboard(false), restart())}
           >

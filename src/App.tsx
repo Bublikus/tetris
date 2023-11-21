@@ -1,6 +1,6 @@
 import React, { FC, useState, useRef, useEffect } from "react";
 import { Tetris } from "./Tetris";
-import { getLeaderboard, Leader } from "./firebase";
+import { addPayerToLeaderboard, getLeaderboard, Leader } from "./firebase";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;
@@ -15,6 +15,8 @@ export const App: FC = () => {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
 
+  const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
+
   const restart = () => {
     if (!isInstance) {
       isInstance = true;
@@ -25,16 +27,35 @@ export const App: FC = () => {
   };
 
   useEffect(() => {
-    if (tetrisRef.current?.isEndGame) {
+    const endGame = async () => {
+      setIsShownLeaderboard(true);
+
+      if (tetrisRef.current?.erasedLines) {
+        const player = prompt(
+          `Lines: ${tetrisRef.current?.erasedLines}\n\nEnter your name: `
+        );
+        const playerName = player?.trim().slice(0, 50) || "Player";
+        await addPayerToLeaderboard(
+          playerName,
+          tetrisRef.current?.erasedLines || 0
+        );
+        await getLeaderboard().then(setLeaders);
+      }
+
       isInstance = false;
       tetrisRef.current?.destroy();
-      setIsShownLeaderboard(true);
-    }
+    };
+
+    if (tetrisRef.current?.isEndGame) endGame();
   }, [tetrisRef.current?.isEndGame]);
 
   useEffect(() => {
     if (!loading) restart();
   }, [loading]);
+
+  useEffect(() => {
+    getLeaderboard().then(setLeaders);
+  }, []);
 
   useEffect(() => {
     const checkSelectionInterval = setInterval(
@@ -80,10 +101,6 @@ export const App: FC = () => {
     "🧐",
   ].find(Boolean);
 
-  useEffect(() => {
-    getLeaderboard().then(setLeaders);
-  }, []);
-
   return (
     <>
       {loading && <p className="loading">loading...</p>}
@@ -125,15 +142,24 @@ export const App: FC = () => {
           >
             <div className="leaderboard-box">
               <h3>Leaderboard</h3>
-              <ol>
-                {leaders.map((leader, i) => (
-                  <li key={i}>
-                    <span>{i + 1}</span>
-                    <span>{leader.player}</span>
-                    <span>{leader.lines}</span>
-                  </li>
-                ))}
-              </ol>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Lines</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedLeaders.map((leader, i) => (
+                    <tr key={i}>
+                      <td>{i + 1}</td>
+                      <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
+                      <td>{leader.lines}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}

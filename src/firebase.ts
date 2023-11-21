@@ -1,6 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, getDocs } from "firebase/firestore/lite";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  addDoc,
+  query,
+  orderBy,
+  limit,
+} from "firebase/firestore/lite";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -27,12 +35,27 @@ export type Leader = {
 
 export async function getLeaderboard(): Promise<Leader[]> {
   try {
-    const citiesCol = collection(db, "leaderboard");
-    const citySnapshot = await getDocs(citiesCol);
-    const cityList = citySnapshot.docs.map((doc) => doc.data() as Leader);
-    return cityList || [];
+    const colRef = collection(db, "leaderboard");
+    const q = query(colRef, orderBy("lines", "desc"), limit(10));
+    const docsRef = await getDocs(q);
+
+    return docsRef.docs.map((doc) => doc.data() as Leader) || [];
   } catch (error) {
     console.log(error);
     return [];
+  }
+}
+
+export async function addPayerToLeaderboard(player: string, lines: number) {
+  try {
+    if (!player || !lines) throw new Error("Invalid request body");
+    const docRef = await addDoc(collection(db, "leaderboard"), {
+      player,
+      lines,
+      date: new Date().toISOString(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.log(error);
   }
 }

@@ -8,7 +8,7 @@ import {
   trackTetrisGameRestart,
   trackTetrisSignGameFinish,
 } from "./firebase";
-import bgImg from "./tetris-bg.jpg";
+import bgImg from "./bg.jpg";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;

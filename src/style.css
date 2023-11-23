@@ -31,7 +31,6 @@ body {
   align-items: center;
   justify-content: center;
 }
-
 /* default styles */
 
 /* base containers */
@@ -43,6 +42,10 @@ header {
   align-self: stretch;
   text-align: center;
   padding-bottom: 20px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 16px;
 }
 
 main {

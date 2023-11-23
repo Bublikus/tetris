@@ -8,6 +8,7 @@ import {
   trackTetrisGameRestart,
   trackTetrisSignGameFinish,
 } from "./firebase";
+import bgImg from "./tetris-bg.jpg";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;
@@ -153,7 +154,7 @@ export const App: FC = () => {
       <main className={loading ? "loading" : ""}>
         <img
           className="bg"
-          src="https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVFGQ1E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--4a5575ba353ee148033a35717f39154a2471941f/tetris-bg-5.jpg"
+          src={bgImg}
           alt="bg"
           onLoad={() => setLoading(false)}
         />

@@ -39,6 +39,7 @@ export const App: FC = () => {
 
   const handleRestart = () => {
     setIsShownLeaderboard(false);
+    setOwnId("");
     trackTetrisGameRestart();
     restart();
   };

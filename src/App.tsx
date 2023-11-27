@@ -19,6 +19,7 @@ let isInstance = false;
 
 export const App: FC = () => {
   const tetrisRef = useRef<Tetris>();
+  const isOverlayRef = useRef(false);
 
   const defaultName = useRef(localStorage.getItem("playerName"));
 
@@ -28,6 +29,8 @@ export const App: FC = () => {
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
+
+  isOverlayRef.current = isShownLeaderboard || isShownInstructions;
 
   const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
 
@@ -124,7 +127,7 @@ export const App: FC = () => {
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
         tetrisRef.current?.pause();
-      } else {
+      } else if (!isOverlayRef.current) {
         tetrisRef.current?.play();
       }
     });

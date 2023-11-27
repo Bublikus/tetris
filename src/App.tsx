@@ -56,6 +56,8 @@ export const App: FC = () => {
     const endGame = async () => {
       setIsShownLeaderboard(true);
 
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       if (tetrisRef.current?.erasedLines) {
         trackTetrisGameFinish(tetrisRef.current?.erasedLines || 0);
 

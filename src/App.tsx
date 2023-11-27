@@ -56,7 +56,7 @@ export const App: FC = () => {
 
           while (true) {
             const player = prompt(
-              `🕹️Lines: ${tetrisRef.current?.erasedLines}\n\nEnter your name: `,
+              `🕹️Lines: ${tetrisRef.current?.erasedLines}\n👤Enter your name: `,
               defaultName.current ?? undefined
             );
 
@@ -143,11 +143,7 @@ export const App: FC = () => {
   const isFill = (i: number) =>
     i + 1 > gameArea.length - (tetrisRef.current?.erasedLines || 0);
 
-  const emoji = [
-    isFull && "😎",
-    !isFull && tetrisRef.current?.isEndGame && "🫣",
-    "🧐",
-  ].find(Boolean);
+  const emoji = [isFull && "😎"].find(Boolean);
 
   return (
     <>
@@ -163,7 +159,7 @@ export const App: FC = () => {
         <header>
           <h1>Tetris Game</h1>
           <h3>
-            Lines: {tetrisRef.current?.erasedLines || 0} {emoji}
+            🕹️Lines: {tetrisRef.current?.erasedLines || 0} {emoji}
           </h3>
         </header>
 

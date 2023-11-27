@@ -27,9 +27,7 @@ export const App: FC = () => {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
-  const [isShownInstructions, setIsShownInstructions] = useState(
-    !localStorage.getItem("instructions")
-  );
+  const [isShownInstructions, setIsShownInstructions] = useState(true);
 
   const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
 
@@ -49,7 +47,6 @@ export const App: FC = () => {
     restart();
     setIsShownInstructions(false);
     tetrisRef.current?.play();
-    localStorage.setItem("instructions", "true");
   };
 
   useEffect(() => {

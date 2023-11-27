@@ -188,7 +188,7 @@ export const App: FC = () => {
               </div>
             </div>
 
-            <h2>Tap tp start</h2>
+            <h2>Tap to start</h2>
           </div>
         )}
 

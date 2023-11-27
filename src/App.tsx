@@ -13,7 +13,7 @@ import swipeImg from "./swipe-all-directions.png";
 import tapImg from "./tap.png";
 import "./style.css";
 
-const isTouch = "touchstart" in window || navigator.maxTouchPoints;
+const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
 let isInstance = false;
 
@@ -27,7 +27,7 @@ export const App: FC = () => {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
-  const [isShownInstructions, setIsShownInstructions] = useState(true);
+  const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
   const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
 
@@ -244,26 +244,24 @@ export const App: FC = () => {
         )}
 
         <footer>
-          {tetrisRef.current?.isEndGame ? (
-            <button type="button" className="restart-button" onClick={restart}>
-              Restart
-            </button>
-          ) : (
-            <strong className="help">
-              <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
+          {/*{tetrisRef.current?.isEndGame && (*/}
+          {/*  <button type="button" className="restart-button" onClick={restart}>*/}
+          {/*    Restart*/}
+          {/*  </button>*/}
+          {/*)*/}
+          <strong className="help">
+            <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
+            <div>
               <div>
-                <div>
-                  &nbsp;&nbsp;&thinsp;&thinsp;↑ &nbsp;&nbsp;&nbsp;&nbsp; -
-                  Rotate
-                </div>
-                <div>← → &thinsp;&thinsp;- Move</div>
-                <div>
-                  &nbsp;&nbsp;&thinsp;&thinsp;↓ &nbsp;&nbsp;&nbsp;&nbsp; - Speed
-                  up
-                </div>
+                &nbsp;&nbsp;&thinsp;&thinsp;↑ &nbsp;&nbsp;&nbsp;&nbsp; - Rotate
               </div>
-            </strong>
-          )}
+              <div>← → &thinsp;&thinsp;- Move</div>
+              <div>
+                &nbsp;&nbsp;&thinsp;&thinsp;↓ &nbsp;&nbsp;&nbsp;&nbsp; - Speed
+                up
+              </div>
+            </div>
+          </strong>
         </footer>
       </main>
     </>

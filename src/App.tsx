@@ -160,6 +160,18 @@ export const App: FC = () => {
 
   const emoji = [isFull && "😎"].find(Boolean);
 
+  const getPrize = (i: number) => {
+    if (i === 0) {
+      return "🥇";
+    } else if (i === 1) {
+      return "🥈";
+    } else if (i === 2) {
+      return "🥉";
+    } else {
+      return "";
+    }
+  }
+
   return (
     <>
       {loading && <p className="loading">loading...</p>}
@@ -197,7 +209,7 @@ export const App: FC = () => {
         <header>
           <h1>Tetris Game</h1>
           <h3>
-            🕹️Lines: {tetrisRef.current?.erasedLines || 0} {emoji}
+            Lines: 🕹{tetrisRef.current?.erasedLines || 0} {emoji}
           </h3>
         </header>
 
@@ -232,14 +244,15 @@ export const App: FC = () => {
                   {sortedLeaders.map((leader, i) => (
                     <tr
                       key={leader.id}
-                      className={leader.id === ownId ? "strong" : ""}
+                      className={leader.id === ownId ? 'strong' : ''}
                     >
                       <td>
-                        {leader.id === ownId ? "→ " : ""}
-                        {i + 1}
+                        <span>{leader.id === ownId ? '→ ' : ''}</span>
+                        <span>{i + 1}</span>
+                        <span>{getPrize(i) || <span className="invisible">🥉</span>}</span>
                       </td>
-                      <td>{leader.player.slice(0, 20).padEnd(20, ".")}</td>
-                      <td>{leader.lines}</td>
+                      <td>{leader.player.slice(0, 20).padEnd(20, '.')}</td>
+                      <td>🕹{leader.lines}</td>
                     </tr>
                   ))}
                 </tbody>

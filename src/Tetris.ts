@@ -23,7 +23,7 @@ export class Tetris {
     width: 10,
     height: 20,
     tickMs: 500,
-    minTickMs: 100,
+    minTickMs: 200,
     winScore: 100,
     timeToMaxSpeedMs: 5 * 60 * 1000,
   };

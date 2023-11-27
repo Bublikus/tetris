@@ -9,6 +9,8 @@ import {
   trackTetrisSignGameFinish,
 } from "./firebase";
 import bgImg from "./bg.jpg";
+import swipeImg from "./swipe-all-directions.png";
+import tapImg from "./tap.png";
 import "./style.css";
 
 const isTouch = "touchstart" in window || navigator.maxTouchPoints;
@@ -25,6 +27,9 @@ export const App: FC = () => {
   const [leaders, setLeaders] = useState<Leader[]>([]);
   const [ownId, setOwnId] = useState("");
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
+  const [isShownInstructions, setIsShownInstructions] = useState(
+    !localStorage.getItem("instructions")
+  );
 
   const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
 
@@ -42,6 +47,9 @@ export const App: FC = () => {
     setOwnId("");
     trackTetrisGameRestart();
     restart();
+    setIsShownInstructions(false);
+    tetrisRef.current?.play();
+    localStorage.setItem("instructions", "true");
   };
 
   useEffect(() => {
@@ -98,11 +106,16 @@ export const App: FC = () => {
   }, [tetrisRef.current?.isEndGame]);
 
   useEffect(() => {
-    if (!loading) restart();
+    if (!loading && !isShownInstructions) restart();
   }, [loading]);
 
   useEffect(() => {
     getLeaderboard().then(setLeaders);
+
+    if (isShownInstructions) {
+      restart();
+      tetrisRef.current?.pause();
+    }
   }, []);
 
   useEffect(() => {
@@ -155,6 +168,29 @@ export const App: FC = () => {
           alt="bg"
           onLoad={() => setLoading(false)}
         />
+
+        {isShownInstructions && (
+          <div role="button" className="instruction" onClick={handleRestart}>
+            <h2>How to play</h2>
+
+            <div className="instruction__images">
+              <div className="instruction__image">
+                <span className="instruction__image-title">
+                  Swipe{"\n"}to{"\n"}control
+                </span>
+                <img src={swipeImg} alt="swipe" />
+              </div>
+              <div className="instruction__image">
+                <span className="instruction__image-title">
+                  Tap{"\n"}to{"\n"}rotate
+                </span>
+                <img src={tapImg} alt="tap" />
+              </div>
+            </div>
+
+            <h2>Tap tp start</h2>
+          </div>
+        )}
 
         <header>
           <h1>Tetris Game</h1>

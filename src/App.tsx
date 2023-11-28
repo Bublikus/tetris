@@ -66,7 +66,7 @@ export const App: FC = () => {
 
           while (true) {
             const player = prompt(
-              `🕹️Lines: ${tetrisRef.current?.erasedLines}\n👤Enter your name: `,
+              `Lines: 🕹️${tetrisRef.current?.erasedLines}\n👤Enter your name: `,
               defaultName.current ?? undefined
             );
 

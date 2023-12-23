@@ -65,19 +65,19 @@ export async function addPayerToLeaderboard(player: string, lines: number) {
 
 // Analytics
 
-export function trackTetrisGameFinish(lines: number) {
+export function trackGameFinish(lines: number) {
   logEvent(analytics, "tetris_game_finish", {
     lines,
   });
 }
 
-export function trackTetrisSignGameFinish(lines: number, player: string) {
+export function trackSignGameFinish(lines: number, player: string) {
   logEvent(analytics, "tetris_sign_game_finish", {
     lines,
     player,
   });
 }
 
-export function trackTetrisGameRestart() {
+export function trackGameRestart() {
   logEvent(analytics, "tetris_game_restart");
 }

@@ -8,7 +8,8 @@
     "firebase": "^10.6.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-error-boundary": "^4.0.11"
+    "react-error-boundary": "^4.0.11",
+    "react-responsive-modal": "^6.4.2"
   },
   "scripts": {
     "start": "react-scripts start",

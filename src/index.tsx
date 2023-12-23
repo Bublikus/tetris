@@ -16,9 +16,9 @@ function fallbackRender({ error }: { error: Error }) {
 const root = createRoot(document.getElementById("root"));
 
 root.render(
-  <StrictMode>
+  // <StrictMode>
     <ErrorBoundary fallbackRender={fallbackRender}>
       <App />
     </ErrorBoundary>
-  </StrictMode>
+  // </StrictMode>
 );

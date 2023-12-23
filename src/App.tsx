@@ -4,35 +4,43 @@ import {
   addPayerToLeaderboard,
   getLeaderboard,
   Leader,
-  trackTetrisGameFinish,
-  trackTetrisGameRestart,
-  trackTetrisSignGameFinish,
+  trackGameFinish,
+  trackGameRestart,
+  trackSignGameFinish,
 } from "./firebase";
-import bgImg from "./bg.jpg";
-import swipeImg from "./swipe-all-directions.png";
-import tapImg from "./tap.png";
+import { GameContainer } from "./components/GameContainer";
+import { Instructions } from "./components/Instructions";
+import { Leaderboard } from "./components/Leaderboard";
+import {PlayerModal} from './components/PlayerModal';
+import { useRemoveSelection } from "./hooks/useRemoveSelection";
+import { useVisibilityChange } from "./hooks/useVisibilityChange";
+import { useBlockGestures } from "./hooks/useBlockGestures";
 import "./style.css";
 
 const isTouch = "touchstart" in window || !!navigator.maxTouchPoints;
 
 let isInstance = false;
 
+const defaultPlayer: Leader = {
+  id: "",
+  player: `player_${Math.floor(new Date().getTime() / 1000)}`,
+  lines: 0,
+  date: new Date().toLocaleString(),
+};
+
 export const App: FC = () => {
   const tetrisRef = useRef<Tetris>();
-  const isOverlayRef = useRef(false);
+  const isOverlay = useRef(false);
 
-  const defaultName = useRef(localStorage.getItem("playerName"));
-
-  const [loading, setLoading] = useState(true);
   const [gameArea, setGameArea] = useState<string[][]>([]);
   const [leaders, setLeaders] = useState<Leader[]>([]);
-  const [ownId, setOwnId] = useState("");
+  const [player, setPlayer] = useState<Leader>(defaultPlayer);
+  const [showPlayerModal, setShowPlayerModal] = useState(false);
   const [isShownLeaderboard, setIsShownLeaderboard] = useState(false);
   const [isShownInstructions, setIsShownInstructions] = useState(isTouch);
 
-  isOverlayRef.current = isShownLeaderboard || isShownInstructions;
-
-  const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
+  isOverlay.current =
+    isShownLeaderboard || isShownInstructions || showPlayerModal;
 
   const restart = () => {
     if (!isInstance) {
@@ -45,112 +53,54 @@ export const App: FC = () => {
 
   const handleRestart = () => {
     setIsShownLeaderboard(false);
-    setOwnId("");
-    trackTetrisGameRestart();
+    setPlayer(defaultPlayer);
+    trackGameRestart();
     restart();
     setIsShownInstructions(false);
     tetrisRef.current?.play();
   };
 
+  const onPlayerModalClose = async (playerName: string) => {
+    const score = tetrisRef.current?.erasedLines || 0;
+
+    setShowPlayerModal(false);
+
+    if (score && playerName) {
+      const playerId = await addPayerToLeaderboard(playerName, score);
+      if (playerId) setPlayer((prev) => ({ ...prev, id: playerId }));
+      trackSignGameFinish(score, playerName);
+      await getLeaderboard().then(setLeaders);
+    }
+  };
+
   useEffect(() => {
     const endGame = async () => {
+      const score = tetrisRef.current?.erasedLines || 0;
+      trackGameFinish(score);
       setIsShownLeaderboard(true);
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (tetrisRef.current?.erasedLines) {
-        trackTetrisGameFinish(tetrisRef.current?.erasedLines || 0);
-
-        const promptPlayer = () => {
-          let playerName;
-
-          while (true) {
-            const player = prompt(
-              `Lines: 🕹️${tetrisRef.current?.erasedLines}\n👤Enter your name: `,
-              defaultName.current ?? undefined
-            );
-
-            playerName = player?.trim().slice(0, 50);
-
-            if (playerName !== null && playerName !== "") break;
-          }
-
-          return playerName;
-        };
-
-        const playerName = promptPlayer();
-
-        if (playerName) {
-          const playerId = await addPayerToLeaderboard(
-            playerName,
-            tetrisRef.current?.erasedLines || 0
-          );
-
-          localStorage.setItem("playerName", playerName);
-          defaultName.current = playerName;
-
-          if (playerId) setOwnId(playerId);
-
-          trackTetrisSignGameFinish(
-            tetrisRef.current?.erasedLines || 0,
-            playerName
-          );
-
-          await getLeaderboard().then(setLeaders);
-        }
-      }
-
-      isInstance = false;
+      if (score) setShowPlayerModal(true);
       tetrisRef.current?.destroy();
+      isInstance = false;
     };
 
     if (tetrisRef.current?.isEndGame) endGame();
   }, [tetrisRef.current?.isEndGame]);
 
   useEffect(() => {
-    if (!loading && !isShownInstructions) restart();
-  }, [loading]);
-
-  useEffect(() => {
     getLeaderboard().then(setLeaders);
-
-    if (isShownInstructions) {
-      restart();
-      tetrisRef.current?.pause();
-    }
+    if (!isShownInstructions) restart();
   }, []);
 
-  useEffect(() => {
-    const checkSelectionInterval = setInterval(
-      () => window.getSelection()?.removeAllRanges?.(),
-      20
-    );
-
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        tetrisRef.current?.pause();
-      } else if (!isOverlayRef.current) {
-        tetrisRef.current?.play();
-      }
-    });
-
-    const blockGestures = (e: Event) => {
-      e.preventDefault();
-      (document.body.style as any).zoom = 1;
-    };
-
-    document.addEventListener("gesturestart", blockGestures);
-    document.addEventListener("gesturechange", blockGestures);
-    document.addEventListener("gestureend", blockGestures);
-
-    return () => {
-      document.removeEventListener("gesturestart", blockGestures);
-      document.removeEventListener("gesturechange", blockGestures);
-      document.removeEventListener("gestureend", blockGestures);
-
-      clearInterval(checkSelectionInterval);
-    };
-  }, []);
+  useRemoveSelection(!isOverlay.current);
+  useVisibilityChange((visible) =>
+    visible && !isOverlay.current
+      ? tetrisRef.current?.play()
+      : tetrisRef.current?.pause()
+  );
+  useBlockGestures();
 
   const isFull =
     (tetrisRef.current?.erasedLines || 0) >=
@@ -160,128 +110,61 @@ export const App: FC = () => {
 
   const emoji = [isFull && "😎"].find(Boolean);
 
-  const getPrize = (i: number) => {
-    if (i === 0) {
-      return "🥇";
-    } else if (i === 1) {
-      return "🥈";
-    } else if (i === 2) {
-      return "🥉";
-    } else {
-      return "";
-    }
-  }
-
   return (
-    <>
-      {loading && <p className="loading">loading...</p>}
-      <main className={loading ? "loading" : ""}>
-        <img
-          className="bg"
-          src={bgImg}
-          alt="bg"
-          onLoad={() => setLoading(false)}
-        />
+    <GameContainer>
+      <Instructions open={isShownInstructions} onClose={handleRestart} />
 
-        {isShownInstructions && (
-          <div role="button" className="instruction" onClick={handleRestart}>
-            <h2>How to play</h2>
+      <header>
+        <h1>Tetris</h1>
+        <h3>
+          Lines: 🕹{tetrisRef.current?.erasedLines || 0} {emoji}
+        </h3>
+      </header>
 
-            <div className="instruction__images">
-              <div className="instruction__image">
-                <span className="instruction__image-title">
-                  Swipe{"\n"}to{"\n"}control
-                </span>
-                <img src={swipeImg} alt="swipe" />
-              </div>
-              <div className="instruction__image">
-                <span className="instruction__image-title">
-                  Tap{"\n"}to{"\n"}rotate
-                </span>
-                <img src={tapImg} alt="tap" />
-              </div>
+      {tetrisRef.current && (
+        <section className="grid">
+          {gameArea.map((row, i) => (
+            <div key={i} className={`row ${isFill(i) ? "fill" : ""}`}>
+              {row.map((cell, ii) => (
+                <div
+                  key={ii}
+                  className={`cell ${cell} ${cell ? "shape" : ""}`}
+                />
+              ))}
             </div>
+          ))}
+        </section>
+      )}
 
-            <h2>Tap to start</h2>
-          </div>
-        )}
+      <Leaderboard
+        open={isShownLeaderboard}
+        active={!isShownInstructions && !showPlayerModal}
+        player={player}
+        leaders={leaders}
+        onClose={handleRestart}
+      />
 
-        <header>
-          <h1>Tetris Game</h1>
-          <h3>
-            Lines: 🕹{tetrisRef.current?.erasedLines || 0} {emoji}
-          </h3>
-        </header>
-
-        {tetrisRef.current && (
-          <section className="grid">
-            {gameArea.map((row, i) => (
-              <div key={i} className={`row ${isFill(i) ? "fill" : ""}`}>
-                {row.map((cell, ii) => (
-                  <div
-                    key={ii}
-                    className={`cell ${cell} ${cell ? "shape" : ""}`}
-                  />
-                ))}
-              </div>
-            ))}
-          </section>
-        )}
-
-        {isShownLeaderboard && (
-          <div role="button" className="leaderboard" onClick={handleRestart}>
-            <div className="leaderboard-box">
-              <h3>Leaderboard</h3>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>Player</th>
-                    <th>Lines</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedLeaders.map((leader, i) => (
-                    <tr
-                      key={leader.id}
-                      className={leader.id === ownId ? 'strong' : ''}
-                    >
-                      <td>
-                        <span>{leader.id === ownId ? '→ ' : ''}</span>
-                        <span>{i + 1}</span>
-                        <span>{getPrize(i) || <span className="invisible">🥉</span>}</span>
-                      </td>
-                      <td>{leader.player.slice(0, 20).padEnd(20, '.')}</td>
-                      <td>🕹{leader.lines}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <footer>
-          {/*{tetrisRef.current?.isEndGame && (*/}
-          {/*  <button type="button" className="restart-button" onClick={restart}>*/}
-          {/*    Restart*/}
-          {/*  </button>*/}
-          {/*)*/}
-          <strong className="help">
-            <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
+      <footer>
+        <strong className="help">
+          <span>{isTouch ? "Swipe" : "Arrows"} &nbsp;</span>
+          <div>
             <div>
-              <div>
-                &nbsp;&nbsp;&thinsp;&thinsp;↑ &nbsp;&nbsp;&nbsp;&nbsp; - Rotate
-              </div>
-              <div>← → &thinsp;&thinsp;- Move</div>
-              <div>
-                &nbsp;&nbsp;&thinsp;&thinsp;↓ &nbsp;&nbsp;&nbsp;&nbsp; - Speed
-                up
-              </div>
+              &nbsp;&nbsp;&thinsp;&thinsp;↑ &nbsp;&nbsp;&nbsp;&nbsp; - Rotate
             </div>
-          </strong>
-        </footer>
-      </main>
-    </>
+            <div>← → &thinsp;&thinsp;- Move</div>
+            <div>
+              &nbsp;&nbsp;&thinsp;&thinsp;↓ &nbsp;&nbsp;&nbsp;&nbsp; - Speed up
+            </div>
+          </div>
+        </strong>
+      </footer>
+
+      <PlayerModal
+        open={showPlayerModal}
+        score={tetrisRef.current?.erasedLines || 0}
+        defaultName={defaultPlayer.player}
+        onClose={onPlayerModalClose}
+      />
+    </GameContainer>
   );
 };

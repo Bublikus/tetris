@@ -61,7 +61,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="player-modal__form">
         <div className="player-modal__form-section">
-          <h2 className="player-modal__score-title">Score</h2>
+          <h2 className="player-modal__score-title">Lines</h2>
           <h3 className="player-modal__score">{score}</h3>
         </div>
 

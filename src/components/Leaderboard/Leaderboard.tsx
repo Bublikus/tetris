@@ -57,7 +57,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             <tr>
               <th>Rank</th>
               <th>Player</th>
-              <th>Score</th>
+              <th>Lines</th>
             </tr>
           </thead>
           <tbody>

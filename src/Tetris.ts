@@ -1,5 +1,5 @@
 import { shapes } from './shapes';
-import { InputHandler } from './handkers/InputHandler';
+import { InputHandler } from './handlers/InputHandler';
 
 type Config = {
   renderer: Renderer;

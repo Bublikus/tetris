@@ -21,6 +21,9 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const defaultStorageName = useRef(localStorage.getItem("playerName") || "");
   const defaultName = useRef(defaultStorageName.current || defaultPlayerName);
+  const prevScoreRef = useRef(score);
+
+  prevScoreRef.current = prevScoreRef.current || score;
 
   const [name, setName] = useState("");
 
@@ -62,7 +65,7 @@ export const PlayerModal: React.FC<PlayerModalProps> = ({
       <form onSubmit={handleSubmit} className="player-modal__form">
         <div className="player-modal__form-section">
           <h2 className="player-modal__score-title">Lines</h2>
-          <h3 className="player-modal__score">{score}</h3>
+          <h3 className="player-modal__score">{score || prevScoreRef.current}</h3>
         </div>
 
         <div className="player-modal__form-section">

@@ -10,6 +10,12 @@ interface LeaderboardProps {
   onClose(): void;
 }
 
+const emptyPlayer: Omit<Leader, 'id'> = {
+  player: '',
+  lines: '' as unknown as number,
+  date: '',
+}
+
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   open,
   active,
@@ -20,7 +26,10 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  const sortedLeaders = leaders.sort((a, b) => b.lines - a.lines).slice(0, 10);
+  const sortedLeaders = [...leaders].slice(0, 10)
+  const paddedLeaders = [...Array(10 - sortedLeaders.length).fill(emptyPlayer)]
+    .concat(sortedLeaders)
+    .sort((a, b) => (!b.lines ? -1 : b.lines - a.lines))
 
   const getPrize = (i: number) => {
     if (i === 0) {
@@ -61,9 +70,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             </tr>
           </thead>
           <tbody>
-            {sortedLeaders.map((leader, i) => (
+            {paddedLeaders.map((leader, i) => (
               <tr
-                key={leader.id}
+                key={leader.id || i}
                 className={leader.id === player.id ? "strong" : ""}
               >
                 <td>
